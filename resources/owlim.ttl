@@ -1,0 +1,31 @@
+#
+# Sesame configuration template for a owlim repository
+#
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix rep: <http://www.openrdf.org/config/repository#>.
+@prefix sr: <http://www.openrdf.org/config/repository/sail#>.
+@prefix sail: <http://www.openrdf.org/config/sail#>.
+@prefix owlim: <http://www.ontotext.com/trree/owlim#>.
+
+[] a rep:Repository ;
+   rep:repositoryID "owlim" ;
+   rdfs:label "Default OWLIM Repository" ;
+   rep:repositoryImpl [
+      rep:repositoryType "openrdf:SailRepository" ;
+      sr:sailImpl [
+         sail:sailType "swiftowlim:Sail" ;
+         #owlim:ruleset "owl-horst" ;
+         #owlim:ruleset "owl2-rl-reduced-optimized" ;
+         owlim:ruleset "owl2-rl-reduced" ;
+         owlim:noPersist "true" ;
+         owlim:storage-folder "default-storage" ;
+		 owlim:base-URL "http://example.org/owlim#" ;
+         owlim:new-triples-file "new-triples-file.nt" ;
+         owlim:entity-index-size "200000" ;
+         owlim:cache-size "6000" ; 
+         owlim:jobsize "200" ;
+		 owlim:repository-type "in-memory-repository" ;
+		 # owlim:imports "src/test/resources/ontology/owl.rdfs" ;
+		 # owlim:defaultNS "http://www.w3.org/2002/07/owl#" 
+      ]
+   ].
