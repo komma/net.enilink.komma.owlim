@@ -174,7 +174,7 @@ public abstract class OWLIMModelSetSupport implements IModelSet.Internal {
 			parser.setRDFHandler(new StatementCollector(model));
 
 			InputStream in = OWLIMModelSetSupport.class
-					.getResourceAsStream("/resources/owlim.ttl");
+					.getResourceAsStream("/resources/owlim-lite.ttl");
 			try {
 				parser.parse(in, "http://example.org#");
 			} finally {
@@ -191,6 +191,7 @@ public abstract class OWLIMModelSetSupport implements IModelSet.Internal {
 					.create(model, repNode);
 
 			File tmpDir = FileUtil.createTempDir("olwim");
+			tmpDir.deleteOnExit();
 			System.out.println("Using repository dir: "
 					+ tmpDir.getAbsolutePath());
 
