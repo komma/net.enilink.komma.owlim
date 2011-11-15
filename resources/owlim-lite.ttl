@@ -14,6 +14,7 @@
       rep:repositoryType "openrdf:SailRepository" ;
       sr:sailImpl [
          sail:sailType "swiftowlim:Sail" ;
+         #owlim:ruleset "owl-horst" ;
          #owlim:ruleset "owl-horst-optimized" ;
          #owlim:ruleset "owl2-rl-reduced-optimized" ;
          owlim:ruleset "owl2-rl-reduced" ;
