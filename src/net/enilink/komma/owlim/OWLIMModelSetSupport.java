@@ -71,17 +71,18 @@ public abstract class OWLIMModelSetSupport implements IModelSet.Internal {
 		modules.add(new AbstractModule() {
 			@Override
 			protected void configure() {
-				bind(InferencingCapability.class).toInstance(new InferencingCapability() {
-					@Override
-					public boolean doesRDFS() {
-						return true;
-					}
-					
-					@Override
-					public boolean doesOWL() {
-						return true;
-					}
-				});
+				bind(InferencingCapability.class).toInstance(
+						new InferencingCapability() {
+							@Override
+							public boolean doesRDFS() {
+								return true;
+							}
+
+							@Override
+							public boolean doesOWL() {
+								return true;
+							}
+						});
 			}
 
 			@SuppressWarnings("unused")
@@ -104,13 +105,11 @@ public abstract class OWLIMModelSetSupport implements IModelSet.Internal {
 
 		if (AbstractKommaPlugin.IS_ECLIPSE_RUNNING) {
 			RepositoryConnection conn = null;
-
 			try {
 				conn = repository.getConnection();
 				for (String name : bundles) {
-					URL url = FileLocator.find(Platform.getBundle(name),
-							new Path("META-INF/org.openrdf.ontologies"),
-							Collections.emptyMap());
+					URL url = Platform.getBundle(name).getResource(
+							"META-INF/org.openrdf.ontologies");
 					if (url != null) {
 						URL resolvedUrl = FileLocator.resolve(url);
 
