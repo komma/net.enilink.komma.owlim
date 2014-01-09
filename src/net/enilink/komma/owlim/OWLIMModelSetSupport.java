@@ -21,9 +21,19 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
+import net.enilink.composition.annotations.Iri;
+import net.enilink.komma.common.AbstractKommaPlugin;
+import net.enilink.komma.core.InferencingCapability;
+import net.enilink.komma.core.KommaException;
+import net.enilink.komma.core.URI;
+import net.enilink.komma.core.URIImpl;
+import net.enilink.komma.em.KommaEM;
+import net.enilink.komma.model.IModelSet;
+import net.enilink.komma.model.MODELS;
+import net.enilink.komma.sesame.SesameModule;
+
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
-import net.enilink.composition.annotations.Iri;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
@@ -50,16 +60,6 @@ import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.ontotext.trree.owlim_ext.config.OWLIMSailFactory;
-
-import net.enilink.komma.KommaCore;
-import net.enilink.komma.common.AbstractKommaPlugin;
-import net.enilink.komma.model.IModelSet;
-import net.enilink.komma.model.MODELS;
-import net.enilink.komma.core.InferencingCapability;
-import net.enilink.komma.core.KommaException;
-import net.enilink.komma.core.URI;
-import net.enilink.komma.core.URIImpl;
-import net.enilink.komma.sesame.SesameModule;
 
 @Iri(MODELS.NAMESPACE + "OwlimModelSet")
 public abstract class OWLIMModelSetSupport implements IModelSet.Internal {
@@ -98,8 +98,7 @@ public abstract class OWLIMModelSetSupport implements IModelSet.Internal {
 
 	protected void addBasicKnowledge(Repository repository)
 			throws RepositoryException {
-		String[] bundles = { "net.enilink.vocab.owl",
-				"net.enilink.vocab.rdfs" };
+		String[] bundles = { "net.enilink.vocab.owl", "net.enilink.vocab.rdfs" };
 
 		if (AbstractKommaPlugin.IS_ECLIPSE_RUNNING) {
 			RepositoryConnection conn = null;
@@ -154,7 +153,7 @@ public abstract class OWLIMModelSetSupport implements IModelSet.Internal {
 					try {
 						conn.close();
 					} catch (RepositoryException e) {
-						KommaCore.log(e);
+						KommaEM.INSTANCE.log(e);
 					}
 				}
 			}
