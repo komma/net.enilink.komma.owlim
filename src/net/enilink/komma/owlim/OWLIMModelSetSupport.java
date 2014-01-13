@@ -83,7 +83,6 @@ public abstract class OWLIMModelSetSupport implements IModelSet.Internal {
 						});
 			}
 
-			@SuppressWarnings("unused")
 			@Singleton
 			@Provides
 			protected Repository provideRepository() {
@@ -133,7 +132,14 @@ public abstract class OWLIMModelSetSupport implements IModelSet.Internal {
 							if (resolvedUrl != null) {
 								in = resolvedUrl.openStream();
 								if (in != null && in.available() > 0) {
-									conn.add(in, "", RDFFormat.RDFXML);
+									URI defaultGraph = getDefaultGraph();
+									Resource[] contexts = defaultGraph == null ? new Resource[0]
+											: new Resource[] { repository
+													.getValueFactory()
+													.createURI(
+															defaultGraph
+																	.toString()) };
+									conn.add(in, "", RDFFormat.RDFXML, contexts);
 								}
 								if (in != null) {
 									in.close();
