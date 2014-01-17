@@ -23,6 +23,7 @@ import java.util.Properties;
 
 import net.enilink.composition.annotations.Iri;
 import net.enilink.komma.common.AbstractKommaPlugin;
+import net.enilink.komma.core.EntityVar;
 import net.enilink.komma.core.InferencingCapability;
 import net.enilink.komma.core.KommaException;
 import net.enilink.komma.core.URI;
@@ -34,10 +35,10 @@ import net.enilink.komma.sesame.SesameModule;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
-import org.openrdf.model.Graph;
+import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
-import org.openrdf.model.impl.GraphImpl;
+import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
@@ -63,6 +64,8 @@ import com.ontotext.trree.owlim_ext.config.OWLIMSailFactory;
 
 @Iri(MODELS.NAMESPACE + "OwlimModelSet")
 public abstract class OWLIMModelSetSupport implements IModelSet.Internal {
+	EntityVar<RepositoryManager> repositoryManager;
+
 	@Override
 	public void collectInjectionModules(Collection<Module> modules) {
 		modules.add(new SesameModule());
@@ -171,7 +174,7 @@ public abstract class OWLIMModelSetSupport implements IModelSet.Internal {
 			RepositoryRegistry.getInstance().add(new SailRepositoryFactory());
 			SailRegistry.getInstance().add(new OWLIMSailFactory());
 
-			final Graph model = new GraphImpl();
+			final Model model = new LinkedHashModel();
 			RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
 			parser.setRDFHandler(new StatementCollector(model));
 
@@ -182,8 +185,8 @@ public abstract class OWLIMModelSetSupport implements IModelSet.Internal {
 			} finally {
 				in.close();
 			}
-			Iterator<Statement> iter = model.match(null, RDF.TYPE,
-					RepositoryConfigSchema.REPOSITORY);
+			Iterator<Statement> iter = model.filter(null, RDF.TYPE,
+					RepositoryConfigSchema.REPOSITORY).iterator();
 			Resource repNode = null;
 			if (iter.hasNext()) {
 				Statement st = iter.next();
@@ -199,11 +202,11 @@ public abstract class OWLIMModelSetSupport implements IModelSet.Internal {
 
 			RepositoryManager man = new LocalRepositoryManager(tmpDir);
 			man.initialize();
-
 			man.addRepositoryConfig(repConfig);
 
 			Repository repository = man.getRepository("owlim");
 			addBasicKnowledge(repository);
+			repositoryManager.set(man);
 			return repository;
 		} catch (Exception e) {
 			throw new RepositoryException("Unable to initialize repository", e);
@@ -213,5 +216,15 @@ public abstract class OWLIMModelSetSupport implements IModelSet.Internal {
 	@Override
 	public boolean isPersistent() {
 		return false;
+	}
+
+	@Override
+	public void dispose() {
+		// close repository manager to free all managed repositories
+		RepositoryManager man = repositoryManager.get();
+		if (man != null) {
+			man.shutDown();
+		}
+		repositoryManager.remove();
 	}
 }
