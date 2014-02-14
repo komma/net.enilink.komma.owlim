@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: KOMMA OWLIM integration
 Bundle-SymbolicName: net.enilink.komma.owlim;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: org.eclipse.core.runtime,
  net.enilink.komma.model
 Export-Package: net.enilink.komma.owlim

@@ -13,35 +13,22 @@ package net.enilink.komma.owlim;
 import info.aduna.io.FileUtil;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
 
 import net.enilink.composition.annotations.Iri;
-import net.enilink.komma.common.AbstractKommaPlugin;
 import net.enilink.komma.core.EntityVar;
 import net.enilink.komma.core.InferencingCapability;
-import net.enilink.komma.core.KommaException;
-import net.enilink.komma.core.URI;
-import net.enilink.komma.core.URIImpl;
-import net.enilink.komma.em.KommaEM;
-import net.enilink.komma.model.IModelSet;
 import net.enilink.komma.model.MODELS;
-import net.enilink.komma.sesame.SesameModule;
+import net.enilink.komma.model.sesame.MemoryModelSetSupport;
 
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.Platform;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.config.RepositoryConfig;
 import org.openrdf.repository.config.RepositoryConfigSchema;
@@ -50,7 +37,6 @@ import org.openrdf.repository.manager.LocalRepositoryManager;
 import org.openrdf.repository.manager.RepositoryManager;
 import org.openrdf.repository.sail.config.SailRepositoryFactory;
 import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.StatementCollector;
@@ -58,17 +44,15 @@ import org.openrdf.sail.config.SailRegistry;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
 import com.ontotext.trree.owlim_ext.config.OWLIMSailFactory;
 
 @Iri(MODELS.NAMESPACE + "OwlimModelSet")
-public abstract class OWLIMModelSetSupport implements IModelSet.Internal {
+public abstract class OWLIMModelSetSupport extends MemoryModelSetSupport {
 	EntityVar<RepositoryManager> repositoryManager;
 
 	@Override
 	public void collectInjectionModules(Collection<Module> modules) {
-		modules.add(new SesameModule());
+		super.collectInjectionModules(modules);
 		modules.add(new AbstractModule() {
 			@Override
 			protected void configure() {
@@ -85,88 +69,7 @@ public abstract class OWLIMModelSetSupport implements IModelSet.Internal {
 							}
 						});
 			}
-
-			@Singleton
-			@Provides
-			protected Repository provideRepository() {
-				try {
-					return createRepository();
-				} catch (RepositoryException e) {
-					throw new KommaException("Unable to create repository.", e);
-				}
-			}
 		});
-	}
-
-	protected void addBasicKnowledge(Repository repository)
-			throws RepositoryException {
-		String[] bundles = { "net.enilink.vocab.owl", "net.enilink.vocab.rdfs" };
-
-		if (AbstractKommaPlugin.IS_ECLIPSE_RUNNING) {
-			RepositoryConnection conn = null;
-			try {
-				conn = repository.getConnection();
-				for (String name : bundles) {
-					URL url = Platform.getBundle(name).getResource(
-							"META-INF/org.openrdf.ontologies");
-					if (url != null) {
-						URL resolvedUrl = FileLocator.resolve(url);
-
-						Properties properties = new Properties();
-						InputStream in = resolvedUrl.openStream();
-						properties.load(in);
-						in.close();
-
-						URI baseUri = URIImpl.createURI(url.toString())
-								.trimSegments(1);
-						for (Map.Entry<Object, Object> entry : properties
-								.entrySet()) {
-							String file = entry.getKey().toString();
-							if (file.contains("rdfs")) {
-								// skip RDF and RDFS schema
-								continue;
-							}
-
-							URIImpl fileUri = URIImpl.createFileURI(file);
-							fileUri = fileUri.resolve(baseUri);
-
-							resolvedUrl = FileLocator.resolve(new URL(fileUri
-									.toString()));
-							if (resolvedUrl != null) {
-								in = resolvedUrl.openStream();
-								if (in != null && in.available() > 0) {
-									URI defaultGraph = getDefaultGraph();
-									Resource[] contexts = defaultGraph == null ? new Resource[0]
-											: new Resource[] { repository
-													.getValueFactory()
-													.createURI(
-															defaultGraph
-																	.toString()) };
-									conn.add(in, "", RDFFormat.RDFXML, contexts);
-								}
-								if (in != null) {
-									in.close();
-								}
-							}
-						}
-					}
-				}
-			} catch (IOException e) {
-				throw new KommaException("Cannot access RDF data", e);
-			} catch (RepositoryException e) {
-				throw new KommaException("Loading RDF failed", e);
-			} catch (RDFParseException e) {
-				throw new KommaException("Invalid RDF data", e);
-			} finally {
-				if (conn != null) {
-					try {
-						conn.close();
-					} catch (RepositoryException e) {
-						KommaEM.INSTANCE.log(e);
-					}
-				}
-			}
-		}
 	}
 
 	protected Repository createRepository() throws RepositoryException {
@@ -211,11 +114,6 @@ public abstract class OWLIMModelSetSupport implements IModelSet.Internal {
 		} catch (Exception e) {
 			throw new RepositoryException("Unable to initialize repository", e);
 		}
-	}
-
-	@Override
-	public boolean isPersistent() {
-		return false;
 	}
 
 	@Override
