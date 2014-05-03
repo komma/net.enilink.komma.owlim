@@ -8,10 +8,10 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: org.eclipse.core.runtime,
  net.enilink.komma.model
 Export-Package: net.enilink.komma.owlim
-Import-Package: com.google.inject;version="2.0.0",
- com.google.inject.binder;version="2.0.0",
- com.ontotext.trree.owlim_ext;version="4.0.0",
- com.ontotext.trree.owlim_ext.config;version="4.0.0",
+Import-Package: com.google.inject;version="3.0.0",
+ com.google.inject.binder;version="3.0.0",
+ com.ontotext.trree.owlim_ext;version="5.0.0",
+ com.ontotext.trree.owlim_ext.config;version="5.0.0",
  net.enilink.komma.sesame,
  info.aduna.io;version="2.0.0",
  info.aduna.lang.service;version="2.0.0",
