@@ -72,7 +72,7 @@ public abstract class OWLIMModelSetSupport extends MemoryModelSetSupport {
 		});
 	}
 
-	protected Repository createRepository() throws RepositoryException {
+	public Repository createRepository() throws RepositoryException {
 		try {
 			RepositoryRegistry.getInstance().add(new SailRepositoryFactory());
 			SailRegistry.getInstance().add(new OWLIMSailFactory());
